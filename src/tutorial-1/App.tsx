@@ -2,24 +2,9 @@ import { Paper, Divider, Button, List, Tabs, Tab } from '@mui/material';
 import { Item } from './components/Item';
 import { AddField } from './components/AddField';
 import { useReducer, useState } from 'react';
+import { AddTaskPayload, State, Actions } from './types';
 
-type State = {
-  id: number;
-  text: string;
-  complited: boolean;
-};
-
-type AddTaskAction = {
-  type: 'ADD_TASK';
-  payload: { text: string; complited: boolean };
-};
-
-type ComplitedTaskAction = {
-  type: 'COMPLITED_TASK';
-  payload: { index: number; complited: boolean };
-};
-
-const reducer = (state: Array<State>, action: AddTaskAction | ComplitedTaskAction) => {
+const reducer = (state: Array<State>, action: Actions) => {
   switch (action.type) {
     case 'ADD_TASK':
       return [
@@ -32,30 +17,40 @@ const reducer = (state: Array<State>, action: AddTaskAction | ComplitedTaskActio
       ];
 
     case 'COMPLITED_TASK':
-      const newState = [...state];
-      newState[action.payload.index].complited = action.payload.complited;
-      return newState;
+      return state.map((task) =>
+        task.id === action.payload ? { ...task, complited: !task.complited } : task,
+      );
+
+    case 'REMOVE_TASK':
+      return state.filter((item) => item.id !== action.payload);
     default:
       return state;
   }
 };
 
 function App() {
-  const [fields, setFields] = useState({ text: '', checked: false });
   const [state, dispatch] = useReducer(reducer, []);
 
-  const addTask = () => {
+  const addTask = (data: AddTaskPayload) => {
     dispatch({
       type: 'ADD_TASK',
-      payload: { text: fields.text, complited: fields.checked },
+      payload: data,
     });
-    setFields({ text: '', checked: false });
   };
-  const complitedTask = (index: number, isChecked: boolean) => {
+  const complitedTask = (index: number) => {
     dispatch({
       type: 'COMPLITED_TASK',
-      payload: { index, complited: isChecked },
+      payload: index,
     });
+  };
+
+  const removeTask = (index: number) => {
+    if (window.confirm(`Удалить задачу № ${index}`)) {
+      dispatch({
+        type: 'REMOVE_TASK',
+        payload: index,
+      });
+    }
   };
   return (
     <div className="App">
@@ -63,7 +58,7 @@ function App() {
         <Paper className="header" elevation={0}>
           <h4>Список задач</h4>
         </Paper>
-        <AddField onClickAdd={addTask} fields={fields} setFields={setFields} />
+        <AddField onClickAdd={addTask} />
         <Divider />
         <Tabs value={0}>
           <Tab label="Все" />
@@ -72,11 +67,12 @@ function App() {
         </Tabs>
         <Divider />
         <List>
-          {state.map((item, index) => (
+          {state.map((item) => (
             <Item
               onClickCheckBox={complitedTask}
+              onRemove={removeTask}
               key={item.id}
-              id={index}
+              id={item.id}
               text={item.text}
               isComplited={item.complited}
             />
