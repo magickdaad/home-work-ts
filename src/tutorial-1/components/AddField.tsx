@@ -1,25 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { TextField, Button, Checkbox } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import {AddTaskPayload} from '../types'
 
 type AddFildProps = {
-  onClickAdd: () => void;
-  fields: { text: string; checked: boolean };
-  setFields: Function;
+  onClickAdd: (fields: AddTaskPayload) => void;
 };
 
-export const AddField: React.FC<AddFildProps> = ({ onClickAdd, fields, setFields }) => {
+export const AddField: React.FC<AddFildProps> = ({ onClickAdd }) => {
+  const [fields, setFields] = useState({ text: '', complited: false });
+  const onAdd = () => {
+    onClickAdd(fields);
+    setFields({ text: '', complited: false });
+  };
+
   return (
     <div className="field">
       <Checkbox
         className="checkbox"
         icon={<RadioButtonUncheckedIcon />}
         checkedIcon={<CheckCircleIcon />}
-        checked={fields.checked}
+        checked={fields.complited}
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) =>
-          setFields({ ...fields, checked: evt.target.checked })
+          setFields({ ...fields, complited: evt.target.checked })
         }
       />
       <TextField
@@ -31,7 +36,7 @@ export const AddField: React.FC<AddFildProps> = ({ onClickAdd, fields, setFields
           setFields({ ...fields, text: evt.target.value })
         }
       />
-      <Button onClick={onClickAdd}>
+      <Button onClick={onAdd}>
         <AddIcon />
       </Button>
     </div>

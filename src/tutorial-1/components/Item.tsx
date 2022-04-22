@@ -10,10 +10,11 @@ type ItemProps = {
   id: number;
   text: string;
   isComplited: boolean;
-  onClickCheckBox: (index: number, isChecked: boolean) => void;
+  onClickCheckBox: (index: number) => void;
+  onRemove: (index: number) => void;
 };
 
-export const Item: React.FC<ItemProps> = ({ id, text, isComplited, onClickCheckBox }) => {
+export const Item: React.FC<ItemProps> = ({ id, text, isComplited, onClickCheckBox, onRemove }) => {
   return (
     <ListItem>
       <div className="d-flex item">
@@ -21,8 +22,8 @@ export const Item: React.FC<ItemProps> = ({ id, text, isComplited, onClickCheckB
           checked={isComplited}
           icon={<RadioButtonUncheckedIcon />}
           checkedIcon={<CheckCircleIcon />}
-          onChange={(evt: React.ChangeEvent<HTMLInputElement>) => {
-            onClickCheckBox(id, evt.target.checked);
+          onChange={() => {
+            onClickCheckBox(id);
           }}
         />
         <Typography className="item-text">{text}</Typography>
@@ -30,7 +31,7 @@ export const Item: React.FC<ItemProps> = ({ id, text, isComplited, onClickCheckB
           <IconButton>
             <EditIcon style={{ fontSize: 20 }} />
           </IconButton>
-          <IconButton>
+          <IconButton onClick={() => onRemove(id)}>
             <DeleteOutlineIcon style={{ fontSize: 20 }} />
           </IconButton>
         </div>
